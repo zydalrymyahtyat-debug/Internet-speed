@@ -1,23 +1,71 @@
-name: C/C++ CI
+name: Build Flutter APK and EXE
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch: # يتيح لك تشغيل البناء يدوياً من واجهة GitHub
 
 jobs:
-  build:
-
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # توجيه الأوامر للعمل داخل مجلد المشروع
+        working-directory: internet_speed_meter 
 
     steps:
-    - uses: actions/checkout@v4
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17' # الإصدار الموصى به لبيئات أندرويد الحديثة
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK
+          path: internet_speed_meter/build/app/outputs/flutter-apk/app-release.apk
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: internet_speed_meter
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Release-Files
+          # يتم رفع مجلد الإصدار كاملاً لأن تطبيق ويندوز يحتاج إلى ملفات DLL ومجلد Data المرفقة ليعمل
+          path: internet_speed_meter/build/windows/x64/runner/Release/
