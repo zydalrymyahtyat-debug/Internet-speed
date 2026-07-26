@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # بناء ملف APK واحد بحجم صغير مخصص للهواتف الحديثة (يشمل 99% من الأجهزة)
+      # بناء ملف APK واحد بحجم صغير مخصص للهواتف الحديثة
       - name: Build Single Small APK (ARM64)
         run: flutter build apk --release --target-platform android-arm64
 
@@ -57,10 +57,16 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Install dependencies and upgrade
+      - name: Install dependencies
+        run: flutter pub get
+        
+      # هذه الخطوة تقوم بحل خطأ الويندوز برمجياً وتلقائياً قبل البناء
+      - name: Patch CMakeLists to Fix C++ Error
         run: |
-          flutter pub get
-          flutter pub upgrade
+          $file = "windows\CMakeLists.txt"
+          $content = Get-Content $file -Raw
+          $content = $content -replace "project\((.*?)\)", "project(`$1)`n`nadd_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)"
+          Set-Content -Path $file -Value $content
 
       - name: Build Windows
         run: flutter build windows --release
