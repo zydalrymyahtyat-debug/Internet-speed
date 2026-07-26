@@ -1,0 +1,13 @@
+.DS_Store
+.dart_tool/
+.packages
+build/
+.pub-cache/
+.pub/
+/android/app/build/
+/android/app/src/main/res/mipmap-*/
+/ios/Flutter/AppFrameworkInfo.plist
+/ios/Flutter/Flutter.podspec
+/ios/Runner.xcworkspace/
+/macos/Flutter/ephemeral/
+/macos/Runner.xcworkspace/
